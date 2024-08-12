@@ -1,122 +1,186 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
+using TMPro;
+using System;
+using System.Collections;
 
 public class BlackjackManager : MonoBehaviour
 {
-    public List<Sprite> cardSprites; // Assign card sprites in the inspector
-    public SpriteRenderer cardRendererPrefab; // Prefab for card rendering
-    public Transform centralSpawnPoint; // Central point where all cards come from
-    public Transform playerCardStartPos; // Starting position for player cards
-    public Transform dealerCardStartPos; // Starting position for dealer cards
-    public TextMesh playerScoreText; // Use TextMesh for in-world text
-    public TextMesh dealerScoreText;
-    public TextMesh resultText;
-    public Button hitButton;
-    public Button standButton;
+    public List<Sprite> cardSprites; 
+    public List<Sprite> cardBackSprites; 
+    public SpriteRenderer cardRendererPrefab; 
+    public SpriteRenderer cardBackRendererPrefab; 
+    public Transform centralSpawnPoint; 
+    public Transform playerCardStartPos; 
+    public Transform dealerCardStartPos; 
+    public TextMeshPro playerScoreText;
+    public TextMeshPro dealerScoreText;
+    public Vector3 playerCardOffset;
+    public Vector3 dealerCardOffset;
+    public Ease easeCardPlace;
+    public float cardPlaceDuration;
 
     private int playerScore = 0;
     private int dealerScore = 0;
-    private Vector3 playerCardOffset = new Vector3(1.2f, -2f, 0f); // Offset for each new player card
-    private Vector3 dealerCardOffset = new Vector3(1.2f, -2f, 0f); // Offset for each new dealer card
     private int playerCardCount = 0;
     private int dealerCardCount = 0;
 
     private List<int> deck = new List<int>();
     private System.Random random = new System.Random();
-
+    private int playerCardSortingOrder, dealerCardSortingOrder;
+    private int dealerHiddenCardValue;
+    private SpriteRenderer hideCardSpriteRenderer;
+    private int hideCardIndex;
     void Start()
     {
+        InitVariables();
         InitializeDeck();
-        DealInitialCards();
-        hitButton.onClick.AddListener(PlayerHit);
-        standButton.onClick.AddListener(PlayerStand);
     }
-
+    private void OnEnable()
+    {
+        UiManager.Instance.actionHit += PlayerHit;
+        UiManager.Instance.actionStand += PlayerStand;
+    }
+    private void OnDisable()
+    {
+        UiManager.Instance.actionHit -= PlayerHit;
+        UiManager.Instance.actionStand -= PlayerStand;
+    }
+    void InitVariables()
+    {
+        playerCardSortingOrder = 1;
+        dealerCardSortingOrder = 1;
+    }
     void InitializeDeck()
     {
         for (int i = 0; i < cardSprites.Count; i++)
         {
             deck.Add(i);
         }
+        //StartCoroutine(DealInitialCards());
     }
 
-    void DealInitialCards()
+    IEnumerator DealInitialCards()
     {
-        playerScore = DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset, true);
-        dealerScore = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, true);
-        playerScore += DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset, true);
-
-        // Hide the dealer's second card (facing down)
-        dealerCardCount++; // Increment to reserve space for the hidden card
-
+        bool isDone = false;
+        yield return new WaitForSeconds(0.3f);
+        playerScore = DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset,false,playerCardSortingOrder++, () => { isDone = true; });
+        yield return new WaitUntil(() => isDone);
+        isDone = !isDone;
+        dealerScore = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, false, dealerCardSortingOrder++, () => { isDone = true; });
+        yield return new WaitUntil(() => isDone);
+        isDone = !isDone;
+        playerScore += DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset, false, playerCardSortingOrder++, () => { isDone = true; });
+        yield return new WaitUntil(() => isDone);
+        isDone = !isDone;
+        dealerHiddenCardValue = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, true, dealerCardSortingOrder++, () => { isDone = true; });
+        yield return new WaitUntil(() => isDone);
         UpdateScoreText();
     }
 
-    int DrawCard(Transform targetPos, ref int cardCount, Vector3 offset, bool animate)
+    void RotateCard(GameObject goCard, Vector3 endValue, float duration, Sprite spriteCardFace, bool isBackFace = false)
+    {
+        if(isBackFace)
+        {
+            goCard.transform.DORotate(endValue, duration)
+                .OnComplete(() => {
+                    SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
+                    if (spriteRender != null) spriteRender.sprite = spriteCardFace;
+                    goCard.transform.eulerAngles = Vector3.zero;
+                    goCard.transform.localScale = new Vector3(1,1,1);
+                });
+            return;
+        }
+        
+        goCard.transform.DORotate(endValue, duration)
+            .OnComplete(() => {
+                SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
+                if (spriteRender != null) spriteRender.sprite = spriteCardFace;
+            });
+    }
+    int DrawCard(Transform targetPos, ref int cardCount, Vector3 offset, bool isHideCard,int sortingOrder, Action actionCardPlaceDone)
     {
         int randomIndex = random.Next(deck.Count);
         int cardValue = GetCardValue(deck[randomIndex]);
-        deck.RemoveAt(randomIndex);
-
-        // Create and initially position the card at the central spawn point
-        SpriteRenderer cardRenderer = Instantiate(cardRendererPrefab, centralSpawnPoint.position, Quaternion.identity);
-        cardRenderer.sprite = cardSprites[randomIndex];
+        SpriteRenderer cardRenderer;
+        if (isHideCard)
+        {
+            // Create and initially position the card at the central spawn point
+            cardRenderer = Instantiate(cardBackRendererPrefab, centralSpawnPoint.position, Quaternion.identity);
+            cardRenderer.sprite = cardBackSprites[0];
+            hideCardSpriteRenderer = cardRenderer;
+            hideCardIndex = deck[randomIndex];
+        }
+        else
+        {
+            // Create and initially position the card at the central spawn point
+            cardRenderer = Instantiate(cardRendererPrefab, centralSpawnPoint.position, Quaternion.identity);
+            cardRenderer.sprite = cardSprites[deck[randomIndex]];
+        }
+        cardRenderer.sortingOrder = sortingOrder;
 
         // Calculate the target position and rotation
         Vector3 targetCardPos = targetPos.position + offset * cardCount;
         Quaternion targetCardRot = Quaternion.Euler(0, 15f * cardCount, 0); // Rotate on Y axis
 
-        if (animate)
-        {
-            // Animate the card from the central point to the target position
-            cardRenderer.transform.DOMove(targetCardPos, 0.5f).SetEase(Ease.OutBack);
-            cardRenderer.transform.DORotateQuaternion(targetCardRot, 0.5f).SetEase(Ease.OutBack);
-        }
-        else
-        {
-            // Immediately place the card without animation
-            cardRenderer.transform.position = targetCardPos;
-            cardRenderer.transform.rotation = targetCardRot;
-        }
+        // Animate the card from the Spawn point to the target position
+        cardRenderer.transform.DOMove(targetCardPos, cardPlaceDuration).SetEase(easeCardPlace).OnComplete(()=> { actionCardPlaceDone?.Invoke(); });
 
-        cardCount++; // Increment the card count for the next card's position
-
+        cardCount++;
+        deck.RemoveAt(randomIndex);
         return cardValue;
     }
 
     int GetCardValue(int cardIndex)
     {
-        int value = (cardIndex % 13) + 1;
-        return value > 10 ? 10 : value;
+        string cardName = cardSprites[cardIndex].name;
+        string cardValue = cardName.Split('_')[1];
+        if(cardValue == "A")
+        {
+            return 11;
+        }
+        else if(cardValue == "K" || cardValue == "Q" || cardValue == "J")
+        {
+            return 10;
+        }
+        else
+        {
+            return int.Parse(cardValue);
+        }
     }
 
     public void PlayerHit()
     {
         if (playerCardCount < 10) // Assuming a maximum of 10 cards
         {
-            int cardValue = DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset, true);
+            int cardValue = DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset,false, playerCardSortingOrder++, ()=> { });
             playerScore += cardValue;
             UpdateScoreText();
 
             if (playerScore > 21)
             {
-                resultText.text = "Player Busts!";
-                EndGame();
+                string message = "Player Busts!";
+                UiManager.Instance.actionFinalResult(WinnerType.DEALER, message);
+                UiManager.Instance.actionEndGame?.Invoke();
             }
         }
     }
 
-    public void PlayerStand()
+    private void PlayerStand()
     {
-        // Reveal the dealer's hidden card
-        dealerCardCount--; // Move back to the hidden card position
-        dealerScore += DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, false);
+        StartCoroutine(DealerTurn());
+    }
+    IEnumerator DealerTurn()
+    {
+        RotateCard(hideCardSpriteRenderer.gameObject, new Vector3(0, 180, 0), 0.5f, cardSprites[hideCardIndex], true);
+        dealerScore += dealerHiddenCardValue;
+        yield return new WaitForSeconds(1f);
+        dealerScore += DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset,false, dealerCardSortingOrder++,() => { });
 
-        while (dealerScore < 17 && dealerCardCount < 10) // Assuming a maximum of 10 cards
+        while (dealerScore < 17 && dealerCardCount < 10)
         {
-            int cardValue = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, false);
+            int cardValue = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset,false, dealerCardSortingOrder++, () => { });
             dealerScore += cardValue;
         }
 
@@ -134,23 +198,20 @@ public class BlackjackManager : MonoBehaviour
     {
         if (playerScore > dealerScore && playerScore <= 21 || dealerScore > 21)
         {
-            resultText.text = "Player Wins!";
+            string message = "Player Wins!";
+            UiManager.Instance.actionFinalResult(WinnerType.PLAYER, message);
         }
         else if (dealerScore > playerScore && dealerScore <= 21 || playerScore > 21)
         {
-            resultText.text = "Dealer Wins!";
+            string message = "Dealer Wins!";
+            UiManager.Instance.actionFinalResult(WinnerType.DEALER, message);
         }
         else
         {
-            resultText.text = "It's a Tie!";
+            string message = "It's a Tie!";
+            UiManager.Instance.actionFinalResult(WinnerType.TIE, message);
         }
 
-        EndGame();
-    }
-
-    void EndGame()
-    {
-        hitButton.interactable = false;
-        standButton.interactable = false;
+        UiManager.Instance.actionEndGame?.Invoke();
     }
 }
