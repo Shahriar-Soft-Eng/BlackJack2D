@@ -1,0 +1,20 @@
+- 2D - there will be the entire 2D design in its entirety
+- 3DModel - 3D Design
+- Animation - Animation
+- Editor -  materials for the editor extension
+- Editor Default Resources - in our projects, this is for Firebase
+- ExternalDependencyManager - folder for Firebase
+- Firebase - folder for Firebase
+- I2 - localization
+- Materials - materials for objects
+- Parse - folder for FireBase
+- Plugins - folder for Plugins
+- Prefabs - map for all objects
+- Resources -  to load different objects using the Resources Load function
+-Scenes(the only folder that is created by default in the project) - all game scenes are stored
+- Scripts - all our scripts
+- Settings -  global render settings are stored or some other key scriptable object
+- Shaders - shaders are stored
+- StreamingAssets - folder for Firebase
+- Particles - particles
+- Sounds - for sounds
