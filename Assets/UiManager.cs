@@ -32,11 +32,9 @@ public class UiManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textTotalCreditDealer;
     [Header("UI Texts")]
     [SerializeField] private TextMeshProUGUI textFinalResult;
-    [Header("UI Buttons")]
+    [Header("UI Generic Buttons")]
     [SerializeField] private Button buttonSetBet;
     [SerializeField] private Button buttonBetPanelCross;
-    [SerializeField] private Button buttonDeal;
-    [SerializeField] private Button buttonNotDeal;
     [SerializeField] private Button buttonHit;
     [SerializeField] private Button buttonStand;
     [SerializeField] private Button buttonReplay;
@@ -44,10 +42,13 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Button[] buttonsBetAmount;
     [SerializeField] private TextMeshProUGUI textTotalBetAmount;
     [SerializeField] private TextMeshProUGUI textFlyEffect;
-
+    [SerializeField] private Button buttonDeal;
+    [SerializeField] private Button buttonRefuse;
+     
     private System.Random random = new System.Random();
 
     private int totalBetAmount;
+    private string[] strBetAmounts = new string[] {"1","5","10","20" };
     // Start is called before the first frame update
     void Start()
     {
@@ -89,10 +90,18 @@ public class UiManager : MonoBehaviour
         buttonHit.onClick.AddListener(delegate () { actionHit?.Invoke(); });
         buttonStand.onClick.AddListener(delegate () { actionStand?.Invoke(); });*/
 
-        buttonsBetAmount[0].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[0].transform.position,1); });
+        for(int i=0; i<buttonsBetAmount.Length; i++)
+        {
+            buttonsBetAmount[i].onClick.AddListener(() => { 
+                OnClickSetBetAmountButton(buttonsBetAmount[i].transform.position, int.Parse(strBetAmounts[i]));
+            });
+        }
+/*        buttonsBetAmount[0].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[0].transform.position,1); });
         buttonsBetAmount[1].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[1].transform.position, 5); });
         buttonsBetAmount[2].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[2].transform.position, 10); });
-        buttonsBetAmount[3].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[3].transform.position, 20); });
+        buttonsBetAmount[3].onClick.AddListener(()=> { OnClickSetBetAmountButton(buttonsBetAmount[3].transform.position, 20); });*/
+        
+
     }
 
     void FinalResult(WinnerType winnerType, string strFinalMessage)
@@ -134,7 +143,7 @@ public class UiManager : MonoBehaviour
     {
         SetGameObjectState(goSetBetPanel, false);
     }  
-    private void OnClickNotDealButton()
+    private void OnClickRefuseButton()
     {
         SetGameObjectState(goSetBetPanel, false);
     }
