@@ -1,2 +1,0 @@
-8/14/2024 12:57:18 AM: Log - [Singleton] An instance of GameDelegate is needed in the scene, so '(singleton) GameDelegate (UnityEngine.GameObject)' was created with DontDestroyOnLoad.
-8/14/2024 12:57:18 AM: Log - Delegate Initialize
