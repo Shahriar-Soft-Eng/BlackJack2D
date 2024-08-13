@@ -1,6 +1,6 @@
 # Blackjack 2D Game
 
-Welcome to **Blackjack 2D Game**, a classic card game experience designed to bring excitement and strategy to your fingertips. This project is developed by Md Shahriar Islam and is optimized for the Windows platform.
+Welcome to **Blackjack 2D Game**, a classic card game experience designed to bring excitement and strategy to your fingertips. This project was developed by **Md Shahriar Islam** and is optimized for the Windows platform.
 
 ## 🎮 About the Game
 
