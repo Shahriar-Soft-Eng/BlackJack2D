@@ -83,7 +83,11 @@ public class SoundManager : MonoBehaviour
         Sound s = Array.Find(sounds, sound => sound.name == name);
         if (s != null)
         {
-            if(!s.source.isPlaying) s.source.Play();
+            if (s.source.isPlaying)
+            {
+                s.source.Stop();
+            }
+            s.source.Play();
         }
         else
         {

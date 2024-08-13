@@ -24,6 +24,7 @@ public class AvatarPicker : MonoBehaviour
     }
     private void OnClickButtonAction()
     {
+        SoundManager.Instance.Play("click");
         if (!goSelectSprite.gameObject.activeSelf) isSelect = false; //Because this 'goSelectSprite' can be Active/Deactive from another class. 
         if(!isSelect) 
         {//This logic for selected avatar

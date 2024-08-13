@@ -20,7 +20,6 @@ public class UiManager : MonoBehaviour
     public Action<WinnerState, string> actionFinalResult;
     public Action actionHit;
     public Action actionStand;
-    public Action actionSplit;
     public Action actionCompleteCardDistribution;
     public Action actionEndGame;
     public Action actionStartGame;
@@ -75,6 +74,7 @@ public class UiManager : MonoBehaviour
     void Start()
     {
         GameDelegate.Instance.Initialize();
+        SoundManager.Instance.Play("bet");
         InitVariables();
     }
     private void OnEnable()
@@ -104,13 +104,12 @@ public class UiManager : MonoBehaviour
 
     private void InitButtonsListener()
     {
-        buttonSetBet.onClick.AddListener(() => { SetGameObjectState(goSetBetPanel, true); });
+        buttonSetBet.onClick.AddListener(OnClickSetBetButton);
         buttonReplay.onClick.AddListener(OnClickReplayButton);
-        buttonHome.onClick.AddListener(()=> { SceneManager.LoadScene(0); });
-        buttonHit.onClick.AddListener(delegate () { actionHit?.Invoke(); });
-        buttonStand.onClick.AddListener(delegate () { actionStand?.Invoke(); });
+        buttonHome.onClick.AddListener(OnClickHomeButton);
+        buttonHit.onClick.AddListener(OnClickHitButton);
+        buttonStand.onClick.AddListener(OnClickStandButton);
         buttonDouble.onClick.AddListener(OnClickDoubleButton);
-        buttonSplit.onClick.AddListener(() => { actionSplit?.Invoke(); });
 
         for (int i=0; i<buttonsBetAmount.Length; i++)
         {
@@ -172,8 +171,29 @@ public class UiManager : MonoBehaviour
     }
 
     #region OnClick_Buttons_Actions
+    private void OnClickSetBetButton()
+    {
+        SoundManager.Instance.Stop("bet");
+        SetGameObjectState(goSetBetPanel, true);
+    }
+    private void OnClickHitButton()
+    {
+        SoundManager.Instance.Play("click");
+        actionHit?.Invoke();
+    }
+    private void OnClickStandButton()
+    {
+        SoundManager.Instance.Play("click");
+        actionStand?.Invoke();
+    }
+    private void OnClickHomeButton()
+    {
+        SoundManager.Instance.Play("click");
+        SceneManager.LoadScene(0);
+    }
     private void OnClickDealButton()
     {
+        SoundManager.Instance.Play("click");
         SetGameObjectState(goSetBetPanel, false);
         textFlyEffect.text = textTotalBetAmount.text;
         textTotalBetAmount.text = "";
@@ -182,6 +202,7 @@ public class UiManager : MonoBehaviour
     }  
     private void OnClickRefuseButton()
     {
+        SoundManager.Instance.Play("click");
         textTotalBetAmount.text = "$0";
         totalBetAmount = 0;
         playerCurrentMoney = GameDelegate.Instance.TotalPlayerMoney;
@@ -194,6 +215,7 @@ public class UiManager : MonoBehaviour
     }
     private void OnClickDoubleButton()
     {
+        SoundManager.Instance.Play("click");
         if (playerCurrentMoney - (totalBetAmount * 2) <= 0)
         {
             textFinalResult.text = "Not Enough Money!";
@@ -211,6 +233,7 @@ public class UiManager : MonoBehaviour
     }
     private void OnClickSetBetAmountButton(Vector3 buttonPos, int amount)
     {
+        SoundManager.Instance.Play("pick");
         if (playerCurrentMoney - amount <= 0) return;
         SetGameObjectState(buttonDeal.gameObject, true);
         SetGameObjectState(buttonRefuse.gameObject, true);
@@ -229,6 +252,7 @@ public class UiManager : MonoBehaviour
     }
     private void OnClickReplayButton()
     {
+        SoundManager.Instance.Play("click");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     #endregion

@@ -78,10 +78,12 @@ public class MenuManager : MonoBehaviour
     }
     private void OnClickConfirmRestoreButton()
     {
+        SoundManager.Instance.Play("click");
         PlayerPrefs.DeleteAll();
     }
     private void OnClickStartGameButton()
     {
+        SoundManager.Instance.Play("click");
         SceneManager.LoadScene(gamePlaySceneIndex);
     }
     private void SetGameObjectState(GameObject go, bool state)

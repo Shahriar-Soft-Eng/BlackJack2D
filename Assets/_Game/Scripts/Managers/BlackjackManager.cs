@@ -52,14 +52,12 @@ public class BlackjackManager : MonoBehaviour
         UiManager.Instance.actionHit += PlayerHit;
         UiManager.Instance.actionStand += PlayerStand;
         UiManager.Instance.actionStartGame += StartGame;
-        UiManager.Instance.actionSplit += SplitCard;
     }
     private void OnDisable()
     {
         UiManager.Instance.actionHit -= PlayerHit;
         UiManager.Instance.actionStand -= PlayerStand;
         UiManager.Instance.actionStartGame -= StartGame;
-        UiManager.Instance.actionSplit -= SplitCard;
     }
     void InitVariables()
     {
@@ -175,6 +173,7 @@ public class BlackjackManager : MonoBehaviour
     {
         if(isBackFace)
         {
+            SoundManager.Instance.Play("flip");
             goCard.transform.DORotate(endValue, duration)
                 .OnComplete(() => {
                     SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
@@ -235,6 +234,7 @@ public class BlackjackManager : MonoBehaviour
         Vector3 targetCardPos = targetPos.position + offset * cardCount;
         Quaternion targetCardRot = Quaternion.Euler(0, 15f * cardCount, 0); // Rotate on Y axis
 
+        SoundManager.Instance.Play("card");
         // Animate the card from the Spawn point to the target position
         cardRenderer.transform.DOMove(targetCardPos, cardPlaceDuration).SetEase(easeCardPlace).OnComplete(()=> { actionCardPlaceDone?.Invoke(); });
 
@@ -288,10 +288,6 @@ public class BlackjackManager : MonoBehaviour
         StartCoroutine(DealerTurn());
     }
 
-    private void SplitCard()
-    {
-
-    }
     IEnumerator DealerTurn()
     {
         RotateCard(hideCardSpriteRenderer.gameObject, new Vector3(0, 180, 0), 0.5f, cardSprites[hideCardIndex], true);
