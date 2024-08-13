@@ -13,8 +13,10 @@ public enum PlayerType
 
 public class BlackjackManager : MonoBehaviour
 {
+    public List<Sprite> tableSprites; 
     public List<Sprite> cardSprites; 
     public List<Sprite> cardBackSprites; 
+    public SpriteRenderer tableSpriteRenderer; 
     public SpriteRenderer cardRendererPrefab; 
     public SpriteRenderer cardBackRendererPrefab; 
     public Transform centralSpawnPoint; 
@@ -63,6 +65,7 @@ public class BlackjackManager : MonoBehaviour
     {
         playerCardSortingOrder = 1;
         dealerCardSortingOrder = 1;
+        tableSpriteRenderer.sprite = tableSprites[random.Next(tableSprites.Count)];
     }
     void InitializeDeck()
     {
