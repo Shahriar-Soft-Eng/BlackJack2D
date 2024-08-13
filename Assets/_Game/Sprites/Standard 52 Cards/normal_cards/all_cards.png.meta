@@ -192,7 +192,7 @@ TextureImporter:
       name: Heart_5
       rect:
         serializedVersion: 2
-        x: 431
+        x: 430
         y: 786
         width: 100
         height: 151
@@ -360,7 +360,7 @@ TextureImporter:
       name: Heart_8
       rect:
         serializedVersion: 2
-        x: 214
+        x: 215
         y: 630
         width: 101
         height: 151
@@ -696,7 +696,7 @@ TextureImporter:
       name: Diamond_3
       rect:
         serializedVersion: 2
-        x: 215
+        x: 216
         y: 314
         width: 101
         height: 151
@@ -738,7 +738,7 @@ TextureImporter:
       name: Diamond_5
       rect:
         serializedVersion: 2
-        x: 430
+        x: 431
         y: 314
         width: 100
         height: 151
@@ -945,7 +945,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Diamond_11
+      name: Diamond_10
       rect:
         serializedVersion: 2
         x: 431
@@ -1050,10 +1050,10 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spade_11
+      name: Spade_10
       rect:
         serializedVersion: 2
-        x: 966
+        x: 965
         y: 157
         width: 100
         height: 151
@@ -1220,7 +1220,7 @@ TextureImporter:
       Club_J: -957341561
       Club_K: -2067859645
       Club_Q: -2090114803
-      Diamond_11: -398917960
+      Diamond_10: -398917960
       Diamond_2: -1220124067
       Diamond_3: -1152883593
       Diamond_4: -1973259346
@@ -1246,7 +1246,7 @@ TextureImporter:
       Heart_J: -2109689260
       Heart_K: -1924458983
       Heart_Q: 1434838072
-      Spade_11: 1028397724
+      Spade_10: 1028397724
       Spade_2: 985341377
       Spade_3: -931401092
       Spade_4: -1551571747

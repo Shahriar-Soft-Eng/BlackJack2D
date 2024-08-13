@@ -8,24 +8,34 @@ using Unity.VisualScripting;
 public class GameDelegate : Singleton<GameDelegate>
 {
     public int BackgroundIndex { get; set; }
-    public int PlayerSelectedAvatarIndex { get; set; }
-    public bool GamePause { get; set; }
-    public int TotalPlayerCredit {
-        get 
-        { 
-            return PlayerPrefs.GetInt("PlayerCredit", InitialCredit); 
+    public int PlayerSelectedAvatarIndex 
+    {
+        get
+        {
+            return PlayerPrefs.GetInt("PlayerAvatar", 0);
         }
         set
-        {   int credit = PlayerPrefs.GetInt("PlayerCredit", InitialCredit);
-            credit += value;
-            PlayerPrefs.SetInt("PlayerCredit", credit );
+        {
+            PlayerPrefs.SetInt("PlayerAvatar", value);
         }
     }
-    public int InitialCredit = 100;
+    public bool GamePause { get; set; }
+    public int TotalPlayerMoney {
+        get 
+        { 
+            return PlayerPrefs.GetInt("PlayerCredit", InitialMoney); 
+        }
+        set
+        {
+            PlayerPrefs.SetInt("PlayerCredit", value);
+        }
+    }
+    public int InitialMoney { get; private set; }
+    public int RoundCount = 0;
     public void Initialize()
     {
+        InitialMoney = 1000;
         BackgroundIndex = 0;
-        PlayerSelectedAvatarIndex = 0;
         GamePause = false;
         Debug.Log("Delegate Initialize");
     }
