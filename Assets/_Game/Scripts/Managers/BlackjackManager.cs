@@ -10,38 +10,45 @@ public enum PlayerType
     PLAYER,
     DEALER
 }
-
+/// <summary>
+/// This method controll the all gameplay mechanism of 'Blackjack' Game.
+/// Some action are perform when any action call from 'UIManager' class. 
+/// </summary>
 public class BlackjackManager : MonoBehaviour
 {
-    public List<Sprite> tableSprites; 
-    public List<Sprite> cardSprites; 
-    public List<Sprite> cardBackSprites; 
-    public SpriteRenderer tableSpriteRenderer; 
-    public SpriteRenderer cardRendererPrefab; 
-    public SpriteRenderer cardBackRendererPrefab; 
-    public Transform centralSpawnPoint; 
-    public Transform playerCardStartPos; 
-    public Transform dealerCardStartPos; 
-    public TextMeshPro playerScoreText;
-    public TextMeshPro dealerScoreText;
-    public Vector3 playerCardOffset;
-    public Vector3 dealerCardOffset;
-    public Ease easeCardPlace;
-    public float cardPlaceDuration;
+    #region SerializeField
+    [SerializeField] private List<Sprite> tableSprites; 
+    [SerializeField] private List<Sprite> cardSprites; 
+    [SerializeField] private List<Sprite> cardBackSprites; 
+    [SerializeField] private SpriteRenderer tableSpriteRenderer; 
+    [SerializeField] private SpriteRenderer cardRendererPrefab; 
+    [SerializeField] private SpriteRenderer cardBackRendererPrefab; 
+    [SerializeField] private Transform centralSpawnPoint; 
+    [SerializeField] private Transform playerCardStartPos; 
+    [SerializeField] private Transform dealerCardStartPos; 
+    [SerializeField] private TextMeshPro playerScoreText;
+    [SerializeField] private TextMeshPro dealerScoreText;
+    [SerializeField] private Vector3 playerCardOffset;
+    [SerializeField] private Vector3 dealerCardOffset;
+    [SerializeField] private Ease easeCardPlace;
+    [SerializeField] private float cardPlaceDuration;
+    #endregion
 
+    #region PrivateVariables
     private int playerScore = 0;
     private int dealerScore = 0;
     private int playerCardCount = 0;
     private int dealerCardCount = 0;
     private int playerLastCardValue = 0;
-    private int dealerLastCardValue = 0;
-
     private List<int> deck = new List<int>();
     private System.Random random = new System.Random();
     private int playerCardSortingOrder, dealerCardSortingOrder;
     private int dealerHiddenCardValue;
     private SpriteRenderer hideCardSpriteRenderer;
     private int hideCardIndex;
+    #endregion
+
+    #region DefaultMethods
     void Start()
     {
         InitVariables();
@@ -59,6 +66,8 @@ public class BlackjackManager : MonoBehaviour
         UiManager.Instance.actionStand -= PlayerStand;
         UiManager.Instance.actionStartGame -= StartGame;
     }
+    #endregion
+    #region Initialize_Methods
     void InitVariables()
     {
         playerCardSortingOrder = 1;
@@ -121,6 +130,9 @@ public class BlackjackManager : MonoBehaviour
         UpdateScoreText();
         UiManager.Instance.actionCompleteCardDistribution?.Invoke();
     }
+    #endregion
+
+    #region CardSpawnner_Methods
     private void PlayerCardSpawn(Action actionCardPlaced, bool is2ndCard = false)
     {
         int currentCardValue = DrawCard(playerCardStartPos, ref playerCardCount, playerCardOffset, false, playerCardSortingOrder++, actionCardPlaced, is2ndCard);
@@ -137,59 +149,9 @@ public class BlackjackManager : MonoBehaviour
         int currentCardValue = DrawCard(dealerCardStartPos, ref dealerCardCount, dealerCardOffset, true, dealerCardSortingOrder++, actionCardPlaced);
         dealerHiddenCardValue = AceCardValueCalculate(currentCardValue, PlayerType.DEALER);
     }
-    private int AceCardValueCalculate(int value,PlayerType playerType)
-    {
-        if(value == 11)
-        {
-            if(PlayerType.PLAYER == playerType) //Here Player logic
-            {
-                if (playerScore + 11 <= 15)
-                {
-                    return value;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-            else // Here Dealer logic
-            {
-                if (dealerScore + 11 <= 15)
-                {
-                    return value;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-        }
-        else
-        {
-            return value;
-        }
-    }
-    void RotateCard(GameObject goCard, Vector3 endValue, float duration, Sprite spriteCardFace, bool isBackFace = false)
-    {
-        if(isBackFace)
-        {
-            SoundManager.Instance.Play("flip");
-            goCard.transform.DORotate(endValue, duration)
-                .OnComplete(() => {
-                    SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
-                    if (spriteRender != null) spriteRender.sprite = spriteCardFace;
-                    goCard.transform.eulerAngles = Vector3.zero;
-                    goCard.transform.localScale = new Vector3(1,1,1);
-                });
-            return;
-        }
-        
-        goCard.transform.DORotate(endValue, duration)
-            .OnComplete(() => {
-                SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
-                if (spriteRender != null) spriteRender.sprite = spriteCardFace;
-            });
-    }
+    #endregion
+
+    #region CardPlacement_Methods
     int DrawCard(Transform targetPos, ref int cardCount, Vector3 offset, bool isHideCard,int sortingOrder, Action actionCardPlaceDone, bool isPlayer2ndcard = false)
     {
         int randomIndex = 0;
@@ -242,16 +204,15 @@ public class BlackjackManager : MonoBehaviour
         deck.RemoveAt(randomIndex);
         return cardValue;
     }
-
     int GetCardValue(int cardIndex)
     {
         string cardName = cardSprites[cardIndex].name;
         string cardValue = cardName.Split('_')[1];
-        if(cardValue == "A")
+        if (cardValue == "A")
         {
             return 11;
         }
-        else if(cardValue == "K" || cardValue == "Q" || cardValue == "J")
+        else if (cardValue == "K" || cardValue == "Q" || cardValue == "J")
         {
             return 10;
         }
@@ -260,7 +221,41 @@ public class BlackjackManager : MonoBehaviour
             return int.Parse(cardValue);
         }
     }
+    private int AceCardValueCalculate(int value, PlayerType playerType)
+    {
+        if (value == 11)
+        {
+            if (PlayerType.PLAYER == playerType) //Here Player logic
+            {
+                if (playerScore + 11 <= 15)
+                {
+                    return value;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            else // Here Dealer logic
+            {
+                if (dealerScore + 11 <= 15)
+                {
+                    return value;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+        }
+        else
+        {
+            return value;
+        }
+    }
+    #endregion
 
+    #region GameAction_State
     public void PlayerHit()
     {
         if (playerCardCount < 10) // Assuming a maximum of 10 cards
@@ -272,7 +267,7 @@ public class BlackjackManager : MonoBehaviour
             if (playerScore > 21)
             {
                 Sequence sequence = DOTween.Sequence();
-                sequence.AppendInterval(2f);
+                sequence.AppendInterval(1f);
                 sequence.AppendCallback(() => {
                     string message = "Player Busts!";
                     UiManager.Instance.actionFinalResult(WinnerState.DEALER, message);
@@ -302,18 +297,42 @@ public class BlackjackManager : MonoBehaviour
             dealerScore += cardValue;
         }
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         UpdateScoreText();
         CheckWinner();
     }
+    #endregion
 
-    void UpdateScoreText()
+    #region Others_Methods
+    void RotateCard(GameObject goCard, Vector3 endValue, float duration, Sprite spriteCardFace, bool isBackFace = false)
+    {
+        if (isBackFace)
+        {
+            SoundManager.Instance.Play("flip");
+            goCard.transform.DORotate(endValue, duration)
+                .OnComplete(() => {
+                    SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
+                    if (spriteRender != null) spriteRender.sprite = spriteCardFace;
+                    goCard.transform.eulerAngles = Vector3.zero;
+                    goCard.transform.localScale = new Vector3(1, 1, 1);
+                });
+            return;
+        }
+
+        goCard.transform.DORotate(endValue, duration)
+            .OnComplete(() => {
+                SpriteRenderer spriteRender = goCard.GetComponent<SpriteRenderer>();
+                if (spriteRender != null) spriteRender.sprite = spriteCardFace;
+            });
+    }
+
+    private void UpdateScoreText()
     {
         playerScoreText.text = "Player Score: " + playerScore;
         dealerScoreText.text = "Dealer Score: " + dealerScore;
     }
 
-    void CheckWinner()
+    private void CheckWinner()
     {
         if (playerScore > dealerScore && playerScore <= 21 || dealerScore > 21)
         {
@@ -333,4 +352,5 @@ public class BlackjackManager : MonoBehaviour
 
         UiManager.Instance.actionEndGame?.Invoke();
     }
+    #endregion
 }

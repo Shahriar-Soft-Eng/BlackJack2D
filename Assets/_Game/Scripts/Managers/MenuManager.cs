@@ -61,7 +61,7 @@ public class MenuManager : MonoBehaviour
         SetGameObjectState(goLoadingPanel, false);
         SetGameObjectState(goMenuPanel, true);
     }
-    private void GetSelectedAvatarIndex(int index)
+    private void GetSelectedAvatarIndex(int index) //When any avatar click by user then this method call by a Action.
     {
         if (index == -1) return;
         int serial = 0;
@@ -76,6 +76,7 @@ public class MenuManager : MonoBehaviour
         GameDelegate.Instance.PlayerSelectedAvatarIndex = index;
         buttonStartGame.gameObject.SetActive(true);
     }
+    #region Buttons_OnClickMethods
     private void OnClickConfirmRestoreButton()
     {
         SoundManager.Instance.Play("click");
@@ -86,6 +87,7 @@ public class MenuManager : MonoBehaviour
         SoundManager.Instance.Play("click");
         SceneManager.LoadScene(gamePlaySceneIndex);
     }
+    #endregion
     private void SetGameObjectState(GameObject go, bool state)
     {
         go.SetActive(state);

@@ -15,8 +15,8 @@ public enum WinnerState
 }
 public class UiManager : MonoBehaviour
 {
-    #region Static_Members
     public static UiManager Instance;
+    #region System_Actions
     public Action<WinnerState, string> actionFinalResult;
     public Action actionHit;
     public Action actionStand;
@@ -24,6 +24,7 @@ public class UiManager : MonoBehaviour
     public Action actionEndGame;
     public Action actionStartGame;
     #endregion
+    #region SerializeField
     [SerializeField] private List<Sprite> spriteAvatars;
     [Header("HUD Panels GamesObjects")]
     [SerializeField] private GameObject goSetBetPanel;
@@ -50,13 +51,14 @@ public class UiManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textFlyEffect;
     [SerializeField] private Button buttonDeal;
     [SerializeField] private Button buttonRefuse;
-     
+    #endregion
+    #region Private_Fields
     private System.Random random = new System.Random();
-
     private int totalBetAmount;
     private int playerCurrentMoney;
     private int dealerCurrentMoney;
     private string[] strBetAmounts = new string[] {"1","5","10","20" };
+    #endregion
 
     private void Awake()
     {
@@ -89,7 +91,8 @@ public class UiManager : MonoBehaviour
         actionFinalResult -= FinalResult;
         actionCompleteCardDistribution -= CardDistributionComplete;
     }
-    void InitVariables()
+    #region Initialize_Methods
+    private void InitVariables()
     {
         totalBetAmount = 0;
         InitButtonsListener();
@@ -101,7 +104,6 @@ public class UiManager : MonoBehaviour
         imageAvatarDealer.sprite = spriteAvatars[random.Next(spriteAvatars.Count)];
         textTotalMoneyDealer.text = $"${dealerCurrentMoney}";
     }
-
     private void InitButtonsListener()
     {
         buttonSetBet.onClick.AddListener(OnClickSetBetButton);
@@ -122,54 +124,7 @@ public class UiManager : MonoBehaviour
         buttonDeal.onClick.AddListener(OnClickDealButton);
         buttonRefuse.onClick.AddListener(OnClickRefuseButton);
     }
-    private void CardDistributionComplete()
-    {
-        SetGameObjectState(goActionButtonsGroup, true);
-    }
-    void FinalResult(WinnerState winnerState, string strFinalMessage)
-    {
-        if(winnerState == WinnerState.PLAYER)
-        {
-            playerCurrentMoney += totalBetAmount * 2;
-            textTotalMoneyPlayer.text = "$" + playerCurrentMoney.ToString();
-            GameDelegate.Instance.TotalPlayerMoney = playerCurrentMoney;
-            textTotalMoneyPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
-            textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
-
-            dealerCurrentMoney -= totalBetAmount;
-            textTotalMoneyDealer.text = "$" + dealerCurrentMoney.ToString();
-            textTotalMoneyDealer.transform.localScale = new Vector3(1f, 1f, 1f);
-            textTotalMoneyDealer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
-
-            textFinalResult.text = strFinalMessage;
-        }
-        else if(winnerState == WinnerState.DEALER)
-        {
-            GameDelegate.Instance.TotalPlayerMoney = playerCurrentMoney;
-
-            dealerCurrentMoney += totalBetAmount;
-            textTotalMoneyDealer.text = "$" + dealerCurrentMoney.ToString();
-            textTotalMoneyDealer.transform.localScale = new Vector3(1f, 1f, 1f);
-            textTotalMoneyDealer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
-
-            textFinalResult.text = strFinalMessage;
-        }
-        else
-        {
-            textFinalResult.text = strFinalMessage;
-        }
-    }
-    private void EndGame()
-    {
-        buttonHit.interactable = false;
-        buttonStand.interactable = false;
-        buttonDouble.interactable = false;
-    }
-    private void SetGameObjectState(GameObject go, bool state)
-    {
-        go.SetActive(state);
-    }
-
+    #endregion
     #region OnClick_Buttons_Actions
     private void OnClickSetBetButton()
     {
@@ -198,15 +153,15 @@ public class UiManager : MonoBehaviour
         textFlyEffect.text = textTotalBetAmount.text;
         textTotalBetAmount.text = "";
         textFlyEffect.transform.DOMoveY(textFlyEffect.transform.position.y + 475f, 0.5f).SetEase(Ease.InSine)
-            .OnComplete(()=> { actionStartGame?.Invoke(); });
-    }  
+            .OnComplete(() => { actionStartGame?.Invoke(); });
+    }
     private void OnClickRefuseButton()
     {
         SoundManager.Instance.Play("click");
         textTotalBetAmount.text = "$0";
         totalBetAmount = 0;
         playerCurrentMoney = GameDelegate.Instance.TotalPlayerMoney;
-        textTotalMoneyPlayer.text = "$"+playerCurrentMoney.ToString();
+        textTotalMoneyPlayer.text = "$" + playerCurrentMoney.ToString();
         textTotalMoneyPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
         textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
         SetGameObjectState(buttonDeal.gameObject, false);
@@ -219,7 +174,7 @@ public class UiManager : MonoBehaviour
         if (playerCurrentMoney - (totalBetAmount * 2) <= 0)
         {
             textFinalResult.text = "Not Enough Money!";
-            return; 
+            return;
         }
         buttonDouble.interactable = false;
         playerCurrentMoney -= totalBetAmount;
@@ -228,7 +183,7 @@ public class UiManager : MonoBehaviour
         textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
         textTotalMoneyPlayer.text = $"${playerCurrentMoney}";
         totalBetAmount *= 2;
-        textFlyEffect.text = "$"+totalBetAmount.ToString();
+        textFlyEffect.text = "$" + totalBetAmount.ToString();
 
     }
     private void OnClickSetBetAmountButton(Vector3 buttonPos, int amount)
@@ -239,16 +194,16 @@ public class UiManager : MonoBehaviour
         SetGameObjectState(buttonRefuse.gameObject, true);
         playerCurrentMoney -= amount;
         totalBetAmount += amount;
-        textTotalMoneyPlayer.transform.localScale = new Vector3(1f,1f,1f);
-        textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f,0.8f,0.8f), 0.2f).SetLoops(2,LoopType.Yoyo)
-            .OnComplete(()=> {
+        textTotalMoneyPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
+        textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo)
+            .OnComplete(() => {
                 textTotalMoneyPlayer.text = $"${playerCurrentMoney}";
                 textTotalBetAmount.text = $"${totalBetAmount}";
             });
         textFlyEffect.transform.position = buttonPos;
         textFlyEffect.text = $"${amount}";
         textFlyEffect.transform.DOMove(textTotalBetAmount.transform.position, 0.7f).SetEase(Ease.InSine)
-            .OnComplete(()=> { textFlyEffect.text = ""; });
+            .OnComplete(() => { textFlyEffect.text = ""; });
     }
     private void OnClickReplayButton()
     {
@@ -256,4 +211,54 @@ public class UiManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     #endregion
+
+    #region EventAction_Methods
+    private void CardDistributionComplete()
+    {
+        SetGameObjectState(goActionButtonsGroup, true);
+    }
+    private void FinalResult(WinnerState winnerState, string strFinalMessage)
+    {
+        if (winnerState == WinnerState.PLAYER)
+        {
+            playerCurrentMoney += totalBetAmount * 2;
+            textTotalMoneyPlayer.text = "$" + playerCurrentMoney.ToString();
+            GameDelegate.Instance.TotalPlayerMoney = playerCurrentMoney;
+            textTotalMoneyPlayer.transform.localScale = new Vector3(1f, 1f, 1f);
+            textTotalMoneyPlayer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
+
+            dealerCurrentMoney -= totalBetAmount;
+            textTotalMoneyDealer.text = "$" + dealerCurrentMoney.ToString();
+            textTotalMoneyDealer.transform.localScale = new Vector3(1f, 1f, 1f);
+            textTotalMoneyDealer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
+
+            textFinalResult.text = strFinalMessage;
+        }
+        else if (winnerState == WinnerState.DEALER)
+        {
+            GameDelegate.Instance.TotalPlayerMoney = playerCurrentMoney;
+
+            dealerCurrentMoney += totalBetAmount;
+            textTotalMoneyDealer.text = "$" + dealerCurrentMoney.ToString();
+            textTotalMoneyDealer.transform.localScale = new Vector3(1f, 1f, 1f);
+            textTotalMoneyDealer.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), 0.2f).SetLoops(2, LoopType.Yoyo);
+
+            textFinalResult.text = strFinalMessage;
+        }
+        else
+        {
+            textFinalResult.text = strFinalMessage;
+        }
+    }
+    private void EndGame()
+    {
+        buttonHit.interactable = false;
+        buttonStand.interactable = false;
+        buttonDouble.interactable = false;
+    }
+    #endregion
+    private void SetGameObjectState(GameObject go, bool state)
+    {
+        go.SetActive(state);
+    }
 }
