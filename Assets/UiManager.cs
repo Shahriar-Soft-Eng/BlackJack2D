@@ -43,6 +43,7 @@ public class UiManager : MonoBehaviour
     [SerializeField] private Button buttonStand;
     [SerializeField] private Button buttonDouble;
     [SerializeField] private Button buttonSplit;
+    [SerializeField] private Button buttonHome;
     [SerializeField] private Button buttonReplay;
     [Header("Bet Panel Properties")]
     [SerializeField] private Button[] buttonsBetAmount;
@@ -105,6 +106,7 @@ public class UiManager : MonoBehaviour
     {
         buttonSetBet.onClick.AddListener(() => { SetGameObjectState(goSetBetPanel, true); });
         buttonReplay.onClick.AddListener(OnClickReplayButton);
+        buttonHome.onClick.AddListener(()=> { SceneManager.LoadScene(0); });
         buttonHit.onClick.AddListener(delegate () { actionHit?.Invoke(); });
         buttonStand.onClick.AddListener(delegate () { actionStand?.Invoke(); });
         buttonDouble.onClick.AddListener(OnClickDoubleButton);
