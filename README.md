@@ -42,3 +42,4 @@ If you encounter any issues or have suggestions, please open an issue on this re
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
+
